@@ -54,7 +54,17 @@ def unet(pretrained_weights = None,input_size = (256,256,3)):
 
     model = Model(inputs = inputs, outputs = conv10)
 
-    model.compile(optimizer = tf.keras.optimizers.Adam(lr = 1e-3), loss = 'binary_crossentropy', metrics = ['accuracy'])
+    def DiceLoss(targets, inputs, smooth=1e-6):
+        #flatten label and prediction tensors
+        inputs = keras.flatten(inputs)
+        targets = keras.flatten(targets)
+        
+        intersection = keras.sum(keras.dot(targets, inputs))
+        dice = (2*intersection + smooth) / (keras.sum(targets) + keras.sum(inputs) + smooth)
+        return 1 - dice
+    
+    model.compile(optimizer = tf.keras.optimizers.Adam(lr = 1e-3), loss =  DiceLoss,  metrics = ['accuracy'])
+    #model.compile(optimizer = tf.keras.optimizers.Adam(lr = 1e-3), loss = 'binary_crossentropy', metrics = ['accuracy'])
     
     #model.summary()
 
@@ -62,5 +72,6 @@ def unet(pretrained_weights = None,input_size = (256,256,3)):
     	model.load_weights(pretrained_weights)
 
     return model
+
 
 
