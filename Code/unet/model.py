@@ -63,9 +63,9 @@ def unet(pretrained_weights = None,input_size = (256,256,3)):
         dice = (2*intersection + smooth) / (keras.sum(targets) + keras.sum(inputs) + smooth)
         return 1 - dice
     
-    model.compile(optimizer = tf.keras.optimizers.Adam(lr = 1e-3), loss =  DiceLoss,  metrics = ['accuracy'])
-    #model.compile(optimizer = tf.keras.optimizers.Adam(lr = 1e-3), loss = 'binary_crossentropy', metrics = ['accuracy'])
-    
+    #model.compile(optimizer = tf.keras.optimizers.Adam(lr = 1e-3), loss =  DiceLoss,  metrics = ['accuracy'])
+    model.compile(optimizer = tf.keras.optimizers.Adam(lr = 1e-3), loss = 'binary_crossentropy', metrics = [['accuracy','AUC']])
+
     #model.summary()
 
     if(pretrained_weights):
