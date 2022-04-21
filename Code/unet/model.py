@@ -62,7 +62,14 @@ def unet(pretrained_weights = None,input_size = (256,256,3)):
         intersection = keras.sum(keras.dot(targets, inputs))
         dice = (2*intersection + smooth) / (keras.sum(targets) + keras.sum(inputs) + smooth)
         return 1 - dice
-    
+        
+    def dice_coeff(y1, y2): # dice coefficient
+        intersection = keras.sum(keras.sum(keras.abs(y1 * y2), axis=-1))
+        union = keras.sum(keras.sum(keras.abs(y1) + keras.abs(y2), axis=-1))
+        dice =  2*intersection/union
+        # dice = 2*(intersection+smooth)/(union+smooth) if 0/0 occours
+        # to return dice loss just return (1-dice) * (smoothening factor if any)
+        return dice
 
     def iou(y_true, y_pred):
         def f(y_true, y_pred):
@@ -78,9 +85,9 @@ def unet(pretrained_weights = None,input_size = (256,256,3)):
     epochs = 20    
 
     opt = tf.keras.optimizers.Adam(lr)
-    metrics = ["acc", tf.keras.metrics.Recall(), tf.keras.metrics.Precision(), iou]
+    metrics = ["acc", tf.keras.metrics.Recall(), tf.keras.metrics.Precision(), iou, dice_coeff]
 
-    model.compile(loss="binary_crossentropy", optimizer=opt, metrics=metrics)
+    model.compile(loss=dice_coeff, optimizer=opt, metrics=metrics)
     #model.summary()
 
     if(pretrained_weights):
